@@ -256,17 +256,14 @@ export default function Home() {
   const text = typeof current.text === 'function' ? current.text(protagonist) : current.text;
 
   const handleChoice = (yes: boolean) => {
-    let newState = protagonist;
-    if (yes && current.onYes) newState = current.onYes(protagonist);
-    else if (!yes && current.onNo) newState = current.onNo(protagonist);
+    const newState = yes ? (current.onYes ? current.onYes(protagonist) : protagonist) : (current.onNo ? current.onNo(protagonist) : protagonist);
     setProtagonist(newState);
     const next = current.nextScene(newState);
     if (next !== null) setCurrentScene(next);
   };
 
   const handleContinue = () => {
-    let newState = protagonist;
-    if (current.onEnter) newState = current.onEnter(protagonist);
+    const newState = current.onEnter ? current.onEnter(protagonist) : protagonist;
     setProtagonist(newState);
     const next = current.nextScene(newState);
     if (next !== null) {
