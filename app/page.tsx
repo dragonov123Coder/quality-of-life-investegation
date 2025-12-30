@@ -28,7 +28,7 @@ interface Scene {
   onYes?: (state: Protagonist) => Protagonist;
   onNo?: (state: Protagonist) => Protagonist;
   onEnter?: (state: Protagonist) => Protagonist;
-  nextScene: (state: Protagonist) => number | null;
+  nextScene: (state: Protagonist, choice?: boolean) => number | null;
   fact?: string;
 }
 
@@ -42,7 +42,7 @@ const scenes: Scene[] = [
   },
   // Scene 1: Fridge
   {
-    text: "It's morning. You open the fridge, and see one box of ceral.\nDo you choose to eat it now? If so, you will have to buy lunch later.",
+    text: "It's morning. You open your pantry, and see one box of ceral.\nDo you choose to eat it now? If so, you will have to buy lunch later.",
     hasChoice: true,
     onYes: (state) => ({ ...state, inventory: [...state.inventory, "breakfast"] }),
     onNo: (state) => ({ ...state, health_percent: state.health_percent - 5 }),
@@ -117,7 +117,7 @@ const scenes: Scene[] = [
     hasChoice: true,
     onYes: (state) => ({ ...state, social_credit: state.social_credit - 100 }),
     onNo: (state) => ({ ...state, health_percent: state.health_percent - 10 }),
-    nextScene: (state) => state.social_credit < 700 ? 10 : 11,
+    nextScene: (state, choice) => choice ? 10 : 11,
   },
   // Scene 10: Class yes result
   {
@@ -179,13 +179,13 @@ const scenes: Scene[] = [
     hasChoice: true,
     onYes: (state) => ({ ...state, health_percent: state.health_percent + 5 }),
     onNo: (state) => ({ ...state }),
-    nextScene: (state) => state.health_percent > 85 ? 16 : 17,
+    nextScene: (state, choice) => choice ? 16 : 17,
   },
   // Scene 16: Clean yes
   {
     text: "You feel great now that it's clean! However, you loose this time to get grocieres and will have to live with no food tomorrow.\n",
     hasChoice: false,
-    nextScene: () => 18,
+    nextScene: () => 19,
   },
   // Scene 17: Grocery
   {
@@ -199,7 +199,7 @@ const scenes: Scene[] = [
   {
     text: "~~~ You head home... ~~~\nYou enjoy your meal.",
     hasChoice: false,
-    nextScene: (state) => (state.inventory.includes("hoodie") || state.inventory.includes("chips")) ? 19 : 20,
+    nextScene: () => 19,
   },
   // Scene 19: Sick
   {
@@ -245,6 +245,7 @@ const getDescription = (item: string) => {
 
 export default function Home() {
   const [protagonist, setProtagonist] = useState<Protagonist>(initialProtagonist);
+  const [previousProtagonist, setPreviousProtagonist] = useState<Protagonist>(initialProtagonist);
   const [currentScene, setCurrentScene] = useState<number>(0);
   const [showBoard, setShowBoard] = useState<boolean>(false);
   const [fadeOut, setFadeOut] = useState<boolean>(false);
@@ -257,13 +258,15 @@ export default function Home() {
   const text = typeof current.text === 'function' ? current.text(protagonist) : current.text;
 
   const handleChoice = (yes: boolean) => {
+    setPreviousProtagonist(protagonist);
     const newState = yes ? (current.onYes ? current.onYes(protagonist) : protagonist) : (current.onNo ? current.onNo(protagonist) : protagonist);
     setProtagonist(newState);
-    const next = current.nextScene(newState);
+    const next = current.nextScene(newState, yes);
     if (next !== null) setCurrentScene(next);
   };
 
   const handleContinue = () => {
+    setPreviousProtagonist(protagonist);
     const newState = current.onEnter ? current.onEnter(protagonist) : protagonist;
     setProtagonist(newState);
     const next = current.nextScene(newState);
@@ -282,6 +285,14 @@ export default function Home() {
       const y = Math.random() * 80 + 5;
       setIdeas([...ideas, { text: inputValue.trim(), x, y }]);
       setInputValue('');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentScene > 0) {
+      setCurrentScene(currentScene - 1);
+      setProtagonist(initialProtagonist);
+      setPreviousProtagonist(initialProtagonist);
     }
   };
 
@@ -354,9 +365,33 @@ export default function Home() {
     >
       <div className="w-full mb-4 p-4 border rounded bg-gray-200">
         <h2 className="font-bold text-black text-xl md:text-2xl">Stats</h2>
-        <p className="text-black text-base md:text-lg">Money: ${protagonist.balance}</p>
-        <p className="text-black text-base md:text-lg">Social Credit: {protagonist.social_credit} pts</p>
-        <p className="text-black text-base md:text-lg">Health: {protagonist.health_percent}%</p>
+        <p className="text-black text-base md:text-lg">
+          Money: ${protagonist.balance}
+          {(() => {
+            const diff = protagonist.balance - previousProtagonist.balance;
+            if (diff > 0) return <span style={{ color: 'green' }}> (+{diff} ↑)</span>;
+            if (diff < 0) return <span style={{ color: 'red' }}> ({diff} ↓)</span>;
+            return null;
+          })()}
+        </p>
+        <p className="text-black text-base md:text-lg">
+          Social Credit: {protagonist.social_credit} pts
+          {(() => {
+            const diff = protagonist.social_credit - previousProtagonist.social_credit;
+            if (diff > 0) return <span style={{ color: 'green' }}> (+{diff} ↑)</span>;
+            if (diff < 0) return <span style={{ color: 'red' }}> ({diff} ↓)</span>;
+            return null;
+          })()}
+        </p>
+        <p className="text-black text-base md:text-lg">
+          Health: {protagonist.health_percent}%
+          {(() => {
+            const diff = protagonist.health_percent - previousProtagonist.health_percent;
+            if (diff > 0) return <span style={{ color: 'green' }}> (+{diff} ↑)</span>;
+            if (diff < 0) return <span style={{ color: 'red' }}> ({diff} ↓)</span>;
+            return null;
+          })()}
+        </p>
         <p className="text-black text-base md:text-lg">Inventory: {protagonist.inventory.length ? protagonist.inventory.map(item => <span key={item} title={getDescription(item)}>{getEmoji(item)} </span>) : 'None'}</p>
       </div>
       <div className="w-full mb-4 p-4 border border-white rounded bg-black">
@@ -365,11 +400,15 @@ export default function Home() {
       </div>
       {current.hasChoice ? (
         <div className="flex gap-4 mb-4">
+          {currentScene > 0 && <button onClick={handleBack} className="px-3 py-3 bg-gray-500 text-white rounded text-lg md:text-xl">⬅️</button>}
           <button onClick={() => handleChoice(true)} className="px-6 py-3 bg-blue-500 text-white rounded text-lg md:text-xl">Yes</button>
           <button onClick={() => handleChoice(false)} className="px-6 py-3 bg-red-500 text-white rounded text-lg md:text-xl">No</button>
         </div>
       ) : !current.hasChoice ? (
-        <button onClick={handleContinue} className="px-6 py-3 bg-green-500 text-white rounded mb-4 text-lg md:text-xl">Continue</button>
+        <div className="flex gap-4 mb-4">
+          {currentScene > 0 && <button onClick={handleBack} className="px-3 py-3 bg-gray-500 text-white rounded text-lg md:text-xl">⬅️</button>}
+          <button onClick={handleContinue} className="px-6 py-3 bg-green-500 text-white rounded text-lg md:text-xl">Continue</button>
+        </div>
       ) : null}
       {current.fact && (
         <div className="w-full p-4 border rounded bg-yellow-200">
