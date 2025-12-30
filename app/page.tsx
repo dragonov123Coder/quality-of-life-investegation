@@ -91,7 +91,7 @@ const scenes: Scene[] = [
     hasChoice: true,
     onYes: (state) => ({ ...state, inventory: [...state.inventory, "ticket"], balance: state.balance - 5 }),
     onNo: (state) => {
-      let newState = { ...state, social_credit: state.social_credit - 150 };
+      const newState = { ...state, social_credit: state.social_credit - 150 };
       if (!state.inventory.includes("breakfast")) newState.health_percent -= 5;
       return newState;
     },
