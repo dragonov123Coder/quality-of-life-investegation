@@ -32,6 +32,7 @@ interface Scene {
   fact?: string;
 }
 
+// Scenes
 const scenes: Scene[] = [
   // Scene 0: Intro
   {
