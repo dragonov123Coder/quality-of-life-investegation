@@ -42,7 +42,7 @@ const scenes: Scene[] = [
   },
   // Scene 1: Fridge
   {
-    text: "It's morning. You open your pantry, and see one box of ceral.\nDo you choose to eat it now? If so, you will have to buy lunch later.",
+    text: "It's morning. You open your pantry, and see one box of cereal.\nDo you choose to eat it now? If so, you will have to buy lunch later.",
     hasChoice: true,
     onYes: (state) => ({ ...state, inventory: [...state.inventory, "breakfast"] }),
     onNo: (state) => ({ ...state, health_percent: state.health_percent - 5 }),
@@ -183,7 +183,7 @@ const scenes: Scene[] = [
   },
   // Scene 16: Clean yes
   {
-    text: "You feel great now that it's clean! However, you loose this time to get grocieres and will have to live with no food tomorrow.\n",
+    text: "You feel great now that it's clean! However, you lose this time to get grocieres and will have to live with no food tomorrow.\n",
     hasChoice: false,
     nextScene: () => 19,
   },
@@ -211,7 +211,7 @@ const scenes: Scene[] = [
   },
   // Scene 20: Final
   {
-    text: "~~~\nNo matter the descision you take, you will always loose in the end.\n10-11% of children have to live in poverty.\n45% of children growing up in lone-parent familes live in poverty.\n~~~\nMost children who live in poverty in Canada have to work multiple jobs and end up leaving school early.\n\"Having to work multiple jobs while doing fulltime school is so hard and defeating.\"\n\"I was forced to work extra hours to afford food and housing, \nleading me to being unable to dedicate time to school and being forced to drop out of my college courses.\"\n\nPoverty also has an extreme social impact. The impacts on social life occur during middle school. This starts with exclusion, as you can never be as popular as people who have more money. They'll always have the latest fashion trends, technology, and toys. It also means you are restricted to sports, clubs, and other activities that your peers are able to do. Because of this, you would be likely to be bullied, which can lead to depression. This is why poverty is associated with higher rates of dropout, increased participation in crime, as well as increased rates of hospital admission.",
+    text: "~~~\nNo matter the descision you take, you will always loose in the end.\n10-11% of children have to live in poverty.\n45% of children growing up in lone parent familes live in poverty.\n~~~\nMost children who live in poverty in Canada have to work multiple jobs and end up leaving school early.\n\"Having to work multiple jobs while doing fulltime school is so hard and defeating.\"\n\"I was forced to work extra hours to afford food and housing, \nleading me to being unable to dedicate time to school and being forced to drop out of my college courses.\"\n\nPoverty also has an extreme social impact. The impacts on social life occur during middle school. This starts with exclusion, as you have a lower chance of being popular. They'll always have the latest fashion trends, technology, and toys. It also means you are restricted to sports, clubs, and other activities. Because of this, you would be likely to be bullied, which can lead to depression. This is why poverty is associated with higher rates of dropout, increased participation in crime, as well as increased rates of hospital admission.",
     hasChoice: false,
     nextScene: () => null,
   },
