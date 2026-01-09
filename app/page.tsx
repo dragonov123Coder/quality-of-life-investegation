@@ -205,7 +205,7 @@ const scenes: Scene[] = [
   {
     text: "You're feeling a bit sick.\n\nShould you take a day off?",
     hasChoice: true,
-    onYes: (state) => ({ ...state, health_percent: state.health_percent + 25, social_credit: state.social_credit - 15 }),
+    onYes: (state) => ({ ...state, health_percent: (state.health_percent+25 > 100 ? state.health_percent = 100 : state.health_percent += 25), social_credit: state.social_credit - 15 }),
     onNo: (state) => ({ ...state, health_percent: state.health_percent - 10 }),
     nextScene: () => 20,
   },
@@ -270,7 +270,7 @@ export default function Home() {
     const newState = current.onEnter ? current.onEnter(protagonist) : protagonist;
     setProtagonist(newState);
     const next = current.nextScene(newState);
-    if (next !== null) {
+    if (next !== null) { 
       setCurrentScene(next);
     } else {
       // Last scene, fade out and show board
